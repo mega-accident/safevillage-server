@@ -32,7 +32,9 @@ export class AuthService {
       return;
     } catch (error) {
       throw new HttpException(
-        `회원가입 실패, ${error.message}`,
+        {
+          success: false,
+        },
         HttpStatus.CONFLICT,
       );
     }

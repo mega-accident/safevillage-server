@@ -18,22 +18,12 @@ export class AuthController {
   @Post('signup') // POST, /auth/signup
   async createUser(@Body() data: CreateUserDto) {
     // form데이터 처리와 비슷하다. @Body에 담긴 데이터를 data로 받는다.
-    try {
-      const user = await this.authService.createUser(data);
-      // authService의 createUser 메서드를 호출하여 사용자 생성
-      return {
-        success: true,
-        data: user,
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          success: false,
-          message: `회원가입 실패, ${error.message}`,
-        },
-        HttpStatus.CONFLICT,
-      );
-    }
+    const user = await this.authService.createUser(data);
+    // authService의 createUser 메서드를 호출하여 사용자 생성
+    return {
+      success: true,
+      data: user,
+    };
   }
 
   @Post('signin')
