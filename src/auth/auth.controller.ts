@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { SignInUserDto } from './dto/signin-user.dto';
 
 @Controller('auth') // 기본 경로 /auth
 export class AuthController {
@@ -31,6 +32,25 @@ export class AuthController {
           message: `회원가입 실패, ${error.message}`,
         },
         HttpStatus.CONFLICT,
+      );
+    }
+  }
+
+  @Post('signin')
+  async signin(@Body() data: SignInUserDto) {
+    try {
+      const accessToken = await this.authService.signin(data);
+      return {
+        success: true,
+        accessToken,
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: '로그인 실패, 아이디 또는 비밀번호를 확인하세요.',
+        },
+        HttpStatus.UNAUTHORIZED,
       );
     }
   }
