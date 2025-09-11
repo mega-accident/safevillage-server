@@ -20,8 +20,8 @@ model Report {
   title        String
   category     String
   description  String
-  lat          String
-  lon          String
+  lat          Float
+  lon          Float
   dangerDegree String
   dangerCount  Int      @default(0)
   isDanger     Boolean  @default(false)
