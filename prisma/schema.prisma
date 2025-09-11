@@ -13,3 +13,18 @@ model User {
   phone    String @unique
   password String
 }
+
+model Report {
+  id           Int      @id @default(autoincrement())
+  images       String[]
+  title        String
+  category     String
+  description  String
+  lat          Float
+  lon          Float
+  dangerDegree String
+  dangerCount  Int      @default(0)
+  isDanger     Boolean  @default(false)
+  status       String   @default("대기")
+  createdAt    DateTime @default(now())
+}
