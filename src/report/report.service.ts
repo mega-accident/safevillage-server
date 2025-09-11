@@ -44,7 +44,21 @@ export class ReportService {
       where: { id: reportId },
       data: { dangerCount: { increment: 1 } }, // increment는 숫자 필드를 증가시키는 Prisma의 연산자
     });
-    return report;
+
+    // dangerCount >= 5일 때 isDanger를 true로 업데이트
+    if (report.dangerCount >= 5) {
+      const updatedReport = await this.prisma.report.update({
+        where: { id: reportId },
+        data: { isDanger: true },
+      });
+      return updatedReport;
+    } else {
+      const updatedReport = await this.prisma.report.update({
+        where: { id: reportId },
+        data: { isDanger: false },
+      });
+      return updatedReport;
+    }
   }
 
   async deleteDanger(reportId: number) {
@@ -56,6 +70,19 @@ export class ReportService {
         },
       },
     });
-    return report;
+
+    if (report.dangerCount >= 5) {
+      const updatedReport = await this.prisma.report.update({
+        where: { id: reportId },
+        data: { isDanger: true },
+      });
+      return updatedReport;
+    } else {
+      const updatedReport = await this.prisma.report.update({
+        where: { id: reportId },
+        data: { isDanger: false },
+      });
+      return updatedReport;
+    }
   }
 }
