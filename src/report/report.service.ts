@@ -38,4 +38,24 @@ export class ReportService {
       // findUnique + where는 고유한 값을 찾을 때 사용
     });
   }
+
+  async createDanger(reportId: number) {
+    const report = await this.prisma.report.update({
+      where: { id: reportId },
+      data: { dangerCount: { increment: 1 } }, // increment는 숫자 필드를 증가시키는 Prisma의 연산자
+    });
+    return report;
+  }
+
+  async deleteDanger(reportId: number) {
+    const report = await this.prisma.report.update({
+      where: { id: reportId },
+      data: {
+        dangerCount: {
+          decrement: 1, // decrement는 숫자 감소
+        },
+      },
+    });
+    return report;
+  }
 }

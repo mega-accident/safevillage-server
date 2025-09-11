@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -34,6 +35,24 @@ export class ReportController {
   @Get(':id')
   async getReportById(@Param('id', ParseIntPipe) id: number) {
     const report = await this.reportService.getReportById(id);
+    return {
+      success: true,
+      data: report,
+    };
+  }
+
+  @Post(':id/danger')
+  async createDanger(@Param('id', ParseIntPipe) reportId: number) {
+    const report = await this.reportService.createDanger(reportId);
+    return {
+      success: true,
+      data: report,
+    };
+  }
+
+  @Delete(':id/danger')
+  async deleteDanger(@Param('id', ParseIntPipe) reportId: number) {
+    const report = await this.reportService.deleteDanger(reportId);
     return {
       success: true,
       data: report,
