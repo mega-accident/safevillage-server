@@ -8,7 +8,7 @@ import {
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SignInUserDto } from './dto/signin-user.dto';
-import { Public } from './pulic.decorator';
+import { Public } from './public.decorator';
 
 @Controller('auth') // 기본 경로 /auth
 export class AuthController {

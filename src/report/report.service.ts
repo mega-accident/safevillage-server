@@ -41,24 +41,17 @@ export class ReportService {
 
   async createDanger(reportId: number) {
     const report = await this.prisma.report.update({
-      where: { id: reportId },
+      where: { id: reportId, dangerCount: { gt: 0 } }, // gt는 greater than, 여기선 0보다 큰 값
       data: { dangerCount: { increment: 1 } }, // increment는 숫자 필드를 증가시키는 Prisma의 연산자
     });
 
     // dangerCount >= 5일 때 isDanger를 true로 업데이트
-    if (report.dangerCount >= 5) {
-      const updatedReport = await this.prisma.report.update({
-        where: { id: reportId },
-        data: { isDanger: true },
-      });
-      return updatedReport;
-    } else {
-      const updatedReport = await this.prisma.report.update({
-        where: { id: reportId },
-        data: { isDanger: false },
-      });
-      return updatedReport;
-    }
+    const newIsDanger = report.dangerCount >= 5;
+    if (report.isDanger === newIsDanger) return report; // 변경사항이 없으면 그대로 반환
+    return this.prisma.report.update({
+      where: { id: reportId },
+      data: { isDanger: newIsDanger },
+    }); // 변경사항이 있으면 업데이트된 report 반환
   }
 
   async deleteDanger(reportId: number) {
@@ -71,18 +64,11 @@ export class ReportService {
       },
     });
 
-    if (report.dangerCount >= 5) {
-      const updatedReport = await this.prisma.report.update({
-        where: { id: reportId },
-        data: { isDanger: true },
-      });
-      return updatedReport;
-    } else {
-      const updatedReport = await this.prisma.report.update({
-        where: { id: reportId },
-        data: { isDanger: false },
-      });
-      return updatedReport;
-    }
+    const newIsDanger = report.dangerCount >= 5;
+    if (report.isDanger === newIsDanger) return report;
+    return this.prisma.report.update({
+      where: { id: reportId },
+      data: { isDanger: newIsDanger },
+    });
   }
 }

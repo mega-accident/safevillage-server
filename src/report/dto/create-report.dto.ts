@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsNumberString,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -25,11 +26,11 @@ export class CreateReportDto {
   @IsNotEmpty({ message: '상세 내용을 입력해주세요.' })
   description: string;
 
-  @IsNumber()
+  @IsNumberString() // 숫자 형식 문자열
   @IsNotEmpty({ message: '위도를 선택해주세요.' })
   lat: number;
 
-  @IsNumber()
+  @IsNumberString()
   @IsNotEmpty({ message: '경도를 선택해주세요.' })
   lon: number;
 
