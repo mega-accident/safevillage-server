@@ -6,10 +6,16 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ReportController } from './report/report.controller';
 import { ReportService } from './report/report.service';
 import { ReportModule } from './report/report.module';
+import { JwtGuard } from './auth/jwt.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [AuthModule, PrismaModule, ReportModule],
   controllers: [AppController, ReportController],
-  providers: [AppService, ReportService],
+  providers: [
+    AppService,
+    ReportService,
+    { provide: APP_GUARD, useClass: JwtGuard },
+  ],
 })
 export class AppModule {}
