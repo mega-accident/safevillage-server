@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Headers,
   HttpException,
   HttpStatus,
   Post,
@@ -46,5 +48,14 @@ export class AuthController {
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
+
+  @Get('my')
+  async getMyInfo(@Headers('Authorization') accessToken: string) {
+    const user = await this.authService.getMyInfo(accessToken);
+    return {
+      success: true,
+      data: user,
+    };
   }
 }

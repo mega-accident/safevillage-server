@@ -9,6 +9,10 @@ import {
 } from 'class-validator';
 
 export class CreateReportDto {
+  @IsNumber()
+  @IsNotEmpty({ message: '사용자 ID를 입력해주세요.' })
+  userId: number;
+
   @IsArray()
   @IsString({ each: true }) // 배열의 내부 요소 검사
   @IsNotEmpty({ message: '사진을 첨부해주세요.' })
