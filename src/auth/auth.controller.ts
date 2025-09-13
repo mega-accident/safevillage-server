@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Get,
+  Headers,
   HttpException,
   HttpStatus,
   Post,
@@ -8,6 +10,8 @@ import {
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SignInUserDto } from './dto/signin-user.dto';
+import { Public } from './public.decorator';
+import { User } from './user.decorator';
 
 @Controller('auth') // 기본 경로 /auth
 export class AuthController {
@@ -15,6 +19,7 @@ export class AuthController {
   // AuthService는 사용자 생성 로직을 담당
   // constructor는 클래스가 인스턴스화될 때 호출되는 메서드, 여기서는 authService를 주입받음
 
+  @Public() // Public 데코레이터를 사용하면 인증을 생략한다
   @Post('signup') // POST, /auth/signup
   async createUser(@Body() data: CreateUserDto) {
     // form데이터 처리와 비슷하다. @Body에 담긴 데이터를 data로 받는다.
@@ -26,6 +31,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @Post('signin')
   async signin(@Body() data: SignInUserDto) {
     try {
@@ -43,5 +49,14 @@ export class AuthController {
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
+
+  @Get('my')
+  async getMyInfo(@User() user: { sub: number }) {
+    const userInfo = await this.authService.getMyInfo(user.sub);
+    return {
+      success: true,
+      data: userInfo,
+    };
   }
 }

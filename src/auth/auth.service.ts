@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from '@prisma/client';
 import { SignInUserDto } from './dto/signin-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -60,5 +59,19 @@ export class AuthService {
     const payload = { sub: user.id, phone: user.phone, name: user.name }; // JWT에 담길 정보, sub는 subject의 약자, 토큰의 주체를 나타낸다
     const accessToken = this.jwtService.sign(payload); // JWT 토큰 생성
     return accessToken;
+  }
+
+  async getMyInfo(userID: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userID },
+      include: {
+        reports: true, // 사용자의 신고들도 함께 조회
+      },
+    });
+
+    if (!user) throw new UnauthorizedException('유저 정보가 없습니다.');
+
+    const { password, ...result } = user; // password를 제외한 나머지 정보만 반환
+    return result;
   }
 }
