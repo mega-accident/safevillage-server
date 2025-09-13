@@ -7,17 +7,16 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { User } from 'src/auth/user.decorator';
+import { Report } from '@prisma/client';
 
 @Injectable()
 export class ReportService {
   constructor(private prisma: PrismaService) {}
 
-  private async _updateIsDanger(report: {
+  private async _updateIsDanger(
+    report: Report,
     // _는 private 메서드임을 나타낸다, private 메서드는 클래스 외부에서 접근 불가능하다
-    id: number;
-    dangerCount: number;
-    isDanger: boolean;
-  }) {
+  ) {
     const newIsDanger = report.dangerCount >= 5;
     if (report.isDanger !== newIsDanger) {
       return this.prisma.report.update({
