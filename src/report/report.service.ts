@@ -12,9 +12,11 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class ReportService {
   private s3Client: S3Client;
-  private configService: ConfigService;
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {
     const awsRegion = this.configService.get('AWS_REGION');
     const awsAccessKeyId = this.configService.get('AWS_ACCESS_KEY_ID');
     const awsSecretAccessKey = this.configService.get('AWS_SECRET_ACCESS_KEY');
