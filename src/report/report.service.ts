@@ -59,10 +59,12 @@ export class ReportsService {
     return `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
   }
 
-  private async _updateIsDanger(
-    report: Report,
+  private async _updateIsDanger(report: {
     // _는 private 메서드임을 나타낸다, private 메서드는 클래스 외부에서 접근 불가능하다
-  ) {
+    id: number;
+    dangerCount: number;
+    isDanger: boolean;
+  }) {
     const newIsDanger = report.dangerCount >= 5;
     if (report.isDanger !== newIsDanger) {
       return this.prisma.report.update({
@@ -124,7 +126,9 @@ export class ReportsService {
       throw new HttpException(
         {
           success: false,
-          message: error.message,
+          message: error instanceof Error ? error.message : 'Unknown error',
+          // instanceof는 객체가 특정 클래스의 인스턴스인지 확인하는 연산자
+          // error가 Error 클래스의 인스턴스이면 error.message를 반환, 아니면 'Unknown error' 반환
         },
         HttpStatus.BAD_REQUEST, // 클라이언트 측 요청 형식이 잘못됨
       );
@@ -136,7 +140,7 @@ export class ReportsService {
   }
 
   async getReportById(id: number) {
-    const report = this.prisma.report.findUnique({
+    const report = await this.prisma.report.findUnique({
       where: { id },
       // findUnique + where는 고유한 값을 찾을 때 사용
     });

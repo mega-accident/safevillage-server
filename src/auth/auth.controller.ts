@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpException,
   HttpStatus,
   Post,
@@ -40,7 +39,7 @@ export class AuthController {
         success: true,
         accessToken,
       };
-    } catch (error) {
+    } catch {
       throw new HttpException(
         {
           success: false,

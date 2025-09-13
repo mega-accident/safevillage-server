@@ -10,7 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     JwtModule.registerAsync({
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
         signOptions: {
           expiresIn: configService.get('JWT_EXPIRATION_TIME', '7d'), // 환경 변수에서 만료 시간 설정
