@@ -1,19 +1,36 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReportDto } from './dto/create-report.dto';
+import { User } from 'src/auth/user.decorator';
 
 @Injectable()
 export class ReportService {
   constructor(private prisma: PrismaService) {}
 
-  async createReport(data: CreateReportDto) {
+  async createReport(data: CreateReportDto, @User() user: { sub: number }) {
     const isDanger = data.isDanger ?? data.dangerDegree === '최상';
     // ??는 null 병합 연산자이다. data.isDanger가 null 또는 undefined일 때 data.dangerDegree === '최상'을 할당한다
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: user.sub },
+    });
+
+    if (!existingUser) {
+      throw new HttpException(
+        {
+          success: false,
+          message: '유효하지 않은 사용자입니다.',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     try {
       const report = await this.prisma.report.create({
         data: {
           ...data,
           isDanger,
+          userId: user.sub,
         },
       });
       return report;

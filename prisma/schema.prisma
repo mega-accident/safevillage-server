@@ -8,14 +8,18 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
+  id       Int      @id @default(autoincrement())
   name     String
-  phone    String @unique
+  phone    String   @unique
   password String
+  reports  Report[] @relation("UserReports") // 실제 DB에 컬럼은 없고 관계 설정을 위한 필드
 }
 
 model Report {
   id           Int      @id @default(autoincrement())
+  userId       Int // 실제 DB 컬럼
+  user         User     @relation("UserReports", fields: [userId], references: [id]) // 관계 필드
+  // "UserReports"는 관계 이름, fields는 외래 키 필드, references는 참조 테이블의 기본키 컬럼
   images       String[]
   title        String
   category     String

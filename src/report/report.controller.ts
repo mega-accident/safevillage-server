@@ -9,14 +9,18 @@ import {
 } from '@nestjs/common';
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
+import { User } from 'src/auth/user.decorator';
 
 @Controller('reports')
 export class ReportController {
   constructor(private reportService: ReportService) {}
 
   @Post()
-  async createReport(@Body() data: CreateReportDto) {
-    const report = await this.reportService.createReport(data);
+  async createReport(
+    @Body() data: CreateReportDto,
+    @User() user: { sub: number },
+  ) {
+    const report = await this.reportService.createReport(data, user);
     return {
       success: true,
       data: report,

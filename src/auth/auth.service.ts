@@ -60,4 +60,18 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload); // JWT 토큰 생성
     return accessToken;
   }
+
+  async getMyInfo(userID: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userID },
+      include: {
+        reports: true, // 사용자의 신고들도 함께 조회
+      },
+    });
+
+    if (!user) throw new UnauthorizedException('유저 정보가 없습니다.');
+
+    const { password, ...result } = user; // password를 제외한 나머지 정보만 반환
+    return result;
+  }
 }
