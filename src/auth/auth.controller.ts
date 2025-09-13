@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SignInUserDto } from './dto/signin-user.dto';
 import { Public } from './public.decorator';
+import { User } from './user.decorator';
 
 @Controller('auth') // 기본 경로 /auth
 export class AuthController {
@@ -51,11 +52,11 @@ export class AuthController {
   }
 
   @Get('my')
-  async getMyInfo(@Headers('Authorization') accessToken: string) {
-    const user = await this.authService.getMyInfo(accessToken);
+  async getMyInfo(@User() user: { sub: number }) {
+    const userInfo = await this.authService.getMyInfo(user.sub);
     return {
       success: true,
-      data: user,
+      data: userInfo,
     };
   }
 }

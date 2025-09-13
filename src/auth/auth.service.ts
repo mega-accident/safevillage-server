@@ -61,27 +61,17 @@ export class AuthService {
     return accessToken;
   }
 
-  async getMyInfo(accessToken: string) {
-    try {
-      const token = accessToken?.replace('Bearer ', ''); // "Bearer " 제거
-      if (!token) {
-        throw new UnauthorizedException('토큰이 없습니다.');
-      }
+  async getMyInfo(userID: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userID },
+      include: {
+        reports: true, // 사용자의 신고들도 함께 조회
+      },
+    });
 
-      const decoded = this.jwtService.verify(token); // Header에서 추출한 토큰을 검증
-      const userId = decoded.sub; // 토큰에서 사용자 ID 추출
+    if (!user) throw new UnauthorizedException('유저 정보가 없습니다.');
 
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          reports: true, // 사용자의 신고들도 함께 조회
-        },
-      });
-      if (!user) throw new UnauthorizedException('유저 정보가 없습니다.');
-      const { password, ...result } = user; // password를 제외한 나머지 정보만 반환
-      return result;
-    } catch (error) {
-      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
-    }
+    const { password, ...result } = user; // password를 제외한 나머지 정보만 반환
+    return result;
   }
 }
