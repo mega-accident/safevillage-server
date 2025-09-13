@@ -14,7 +14,7 @@ import { ConfigModule } from '@nestjs/config';
     AuthModule,
     PrismaModule,
     ReportModule,
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
   ],
   controllers: [AppController],
   providers: [

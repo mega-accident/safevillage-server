@@ -14,7 +14,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
+  SwaggerModule.setup('docs', app, document);
 
   app.enableShutdownHooks(); // 애플리케이션 종료 훅 활성화
   app.useGlobalPipes(
