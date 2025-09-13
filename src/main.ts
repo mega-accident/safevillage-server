@@ -15,4 +15,4 @@ async function bootstrap() {
   );
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+bootstrap().catch(console.error); // 부트스트랩 과정에서 에러가 발생하면 콘솔에 출력, 부트스트랩이란 애플리케이션 초기화 과정
