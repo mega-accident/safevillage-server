@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsNumber,
@@ -9,11 +8,6 @@ import {
 } from 'class-validator';
 
 export class CreateReportDto {
-  @IsArray()
-  @IsString({ each: true }) // 배열의 내부 요소 검사
-  @IsNotEmpty({ message: '사진을 첨부해주세요.' })
-  images: string[];
-
   @IsString()
   @IsNotEmpty({ message: '제목을 입력해주세요.' })
   title: string;
