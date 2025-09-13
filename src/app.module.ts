@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ReportsService } from './report/report.service';
+import { ReportService } from './report/report.service';
 import { ReportModule } from './report/report.module';
 import { JwtGuard } from './auth/jwt.guard';
 import { APP_GUARD } from '@nestjs/core';
@@ -19,7 +19,7 @@ import { ConfigModule } from '@nestjs/config';
   controllers: [AppController],
   providers: [
     AppService,
-    ReportsService,
+    ReportService,
     { provide: APP_GUARD, useClass: JwtGuard },
   ],
 })
