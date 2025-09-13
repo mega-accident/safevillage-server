@@ -1,13 +1,33 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { User } from 'src/auth/user.decorator';
+import { Report } from '@prisma/client';
 
 @Injectable()
 export class ReportService {
   constructor(private prisma: PrismaService) {}
 
-  async createReport(data: CreateReportDto, @User() user: { sub: number }) {
+  private async _updateIsDanger(
+    report: Report,
+    // _는 private 메서드임을 나타낸다, private 메서드는 클래스 외부에서 접근 불가능하다
+  ) {
+    const newIsDanger = report.dangerCount >= 5;
+    if (report.isDanger !== newIsDanger) {
+      return this.prisma.report.update({
+        where: { id: report.id },
+        data: { isDanger: newIsDanger },
+      });
+    }
+    return report;
+  }
+
+  async createReport(data: CreateReportDto, user: { sub: number }) {
     const isDanger = data.isDanger ?? data.dangerDegree === '최상';
     // ??는 null 병합 연산자이다. data.isDanger가 null 또는 undefined일 때 data.dangerDegree === '최상'을 할당한다
 
@@ -16,13 +36,7 @@ export class ReportService {
     });
 
     if (!existingUser) {
-      throw new HttpException(
-        {
-          success: false,
-          message: '유효하지 않은 사용자입니다.',
-        },
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new NotFoundException('유효하지 않은 사용자입니다.'); // NotFound -> 404, 리소스를 찾을 수 없음
     }
 
     try {
@@ -50,25 +64,20 @@ export class ReportService {
   }
 
   async getReportById(id: number) {
-    return this.prisma.report.findUnique({
+    const report = this.prisma.report.findUnique({
       where: { id },
       // findUnique + where는 고유한 값을 찾을 때 사용
     });
+    if (!report) throw new NotFoundException('신고를 찾을 수 없습니다.');
+    return report;
   }
 
   async createDanger(reportId: number) {
     const report = await this.prisma.report.update({
-      where: { id: reportId, dangerCount: { gt: 0 } }, // gt는 greater than, 여기선 0보다 큰 값
+      where: { id: reportId },
       data: { dangerCount: { increment: 1 } }, // increment는 숫자 필드를 증가시키는 Prisma의 연산자
     });
-
-    // dangerCount >= 5일 때 isDanger를 true로 업데이트
-    const newIsDanger = report.dangerCount >= 5;
-    if (report.isDanger === newIsDanger) return report; // 변경사항이 없으면 그대로 반환
-    return this.prisma.report.update({
-      where: { id: reportId },
-      data: { isDanger: newIsDanger },
-    }); // 변경사항이 있으면 업데이트된 report 반환
+    return this._updateIsDanger(report);
   }
 
   async deleteDanger(reportId: number) {
@@ -80,12 +89,6 @@ export class ReportService {
         },
       },
     });
-
-    const newIsDanger = report.dangerCount >= 5;
-    if (report.isDanger === newIsDanger) return report;
-    return this.prisma.report.update({
-      where: { id: reportId },
-      data: { isDanger: newIsDanger },
-    });
+    return this._updateIsDanger(report);
   }
 }

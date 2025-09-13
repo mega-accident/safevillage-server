@@ -1,8 +1,9 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
-  IsNumberString,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -25,11 +26,13 @@ export class CreateReportDto {
   @IsNotEmpty({ message: '상세 내용을 입력해주세요.' })
   description: string;
 
-  @IsNumberString() // 숫자 형식 문자열
+  @IsNumber()
+  @Type(() => Number) // 문자열을 숫자로 변환
   @IsNotEmpty({ message: '위도를 선택해주세요.' })
   lat: number;
 
-  @IsNumberString()
+  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty({ message: '경도를 선택해주세요.' })
   lon: number;
 
