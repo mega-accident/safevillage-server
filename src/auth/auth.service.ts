@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -69,7 +70,7 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new UnauthorizedException('유저 정보가 없습니다.');
+    if (!user) throw new NotFoundException('유저 정보가 없습니다.'); // NotFound -> 404, 리소스를 찾을 수 없음
 
     const { password, ...result } = user; // password를 제외한 나머지 정보만 반환
     return result;

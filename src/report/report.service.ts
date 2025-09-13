@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { User } from 'src/auth/user.decorator';
@@ -23,7 +28,7 @@ export class ReportService {
     return report;
   }
 
-  async createReport(data: CreateReportDto, @User() user: { sub: number }) {
+  async createReport(data: CreateReportDto, user: { sub: number }) {
     const isDanger = data.isDanger ?? data.dangerDegree === '최상';
     // ??는 null 병합 연산자이다. data.isDanger가 null 또는 undefined일 때 data.dangerDegree === '최상'을 할당한다
 
@@ -32,13 +37,7 @@ export class ReportService {
     });
 
     if (!existingUser) {
-      throw new HttpException(
-        {
-          success: false,
-          message: '유효하지 않은 사용자입니다.',
-        },
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new NotFoundException('유효하지 않은 사용자입니다.'); // NotFound -> 404, 리소스를 찾을 수 없음
     }
 
     try {
@@ -66,10 +65,12 @@ export class ReportService {
   }
 
   async getReportById(id: number) {
-    return this.prisma.report.findUnique({
+    const report = this.prisma.report.findUnique({
       where: { id },
       // findUnique + where는 고유한 값을 찾을 때 사용
     });
+    if (!report) throw new NotFoundException('신고를 찾을 수 없습니다.');
+    return report;
   }
 
   async createDanger(reportId: number) {
