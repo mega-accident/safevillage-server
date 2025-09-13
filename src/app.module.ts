@@ -7,9 +7,15 @@ import { ReportsService } from './report/report.service';
 import { ReportModule } from './report/report.module';
 import { JwtGuard } from './auth/jwt.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, PrismaModule, ReportModule],
+  imports: [
+    AuthModule,
+    PrismaModule,
+    ReportModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+  ],
   controllers: [AppController],
   providers: [
     AppService,

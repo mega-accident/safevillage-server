@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -39,7 +40,7 @@ export class ReportController {
         );
         if (!hasValidExtension) {
           return callback(
-            new Error(
+            new BadRequestException(
               '지원하지 않는 이미지 형식입니다. (JPG, PNG, GIF, WebP, HEIC)',
             ),
             false,

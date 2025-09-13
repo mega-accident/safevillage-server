@@ -6,36 +6,38 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateReportDto } from './dto/create-report.dto';
-import { Report } from '@prisma/client';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ReportsService {
   private s3Client: S3Client;
+  private configService: ConfigService;
 
   constructor(private prisma: PrismaService) {
-    if (
-      !process.env.AWS_REGION ||
-      !process.env.AWS_ACCESS_KEY_ID ||
-      !process.env.AWS_SECRET_ACCESS_KEY
-    ) {
-      throw new Error(
-        'AWS 환경 변수가 설정되지 않았습니다. .env 파일을 확인하세요.',
-      );
+    const awsRegion = this.configService.get('AWS_REGION');
+    const awsAccessKeyId = this.configService.get('AWS_ACCESS_KEY_ID');
+    const awsSecretAccessKey = this.configService.get('AWS_SECRET_ACCESS_KEY');
+
+    if (!awsRegion || !awsAccessKeyId || !awsSecretAccessKey) {
+      throw new Error('AWS 환경 변수가 설정되지 않았습니다.');
     }
     // S3Client 초기화
     this.s3Client = new S3Client({
-      region: process.env.AWS_REGION,
+      region: awsRegion,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: awsAccessKeyId,
+        secretAccessKey: awsSecretAccessKey,
       },
     });
   }
 
   // S3에 파일을 업로드하는 메서드
   async uploadToS3(file: Express.Multer.File): Promise<string> {
-    if (!process.env.AWS_S3_BUCKET) {
+    const awsS3Bucket = this.configService.get('AWS_S3_BUCKET');
+    const awsRegion = this.configService.get('AWS_REGION');
+
+    if (!awsS3Bucket) {
       throw new Error(
         'S3 버킷 이름이 설정되지 않았습니다. .env 파일을 확인하세요.',
       );
@@ -47,7 +49,7 @@ export class ReportsService {
 
     // S3에 파일 업로드
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET,
+      Bucket: this.configService.get('AWS_S3_BUCKET'),
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
@@ -56,7 +58,7 @@ export class ReportsService {
     // S3에 파일 업로드 실행
     await this.s3Client.send(command);
     // 업로드된 파일의 URL 반환
-    return `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+    return `https://${awsS3Bucket}.s3.${awsRegion}.amazonaws.com/${fileName}`;
   }
 
   private async _updateIsDanger(report: {
@@ -80,11 +82,11 @@ export class ReportsService {
     user: { sub: number },
     files?: Express.Multer.File[], // Multer는 파일 업로드를 처리하는 미들웨어
   ) {
-    if (!files || files.length < 1 || files.length > 3) {
+    if (!files || files.length < 1) {
       throw new HttpException(
         {
           success: false,
-          message: '사진은 1~3개로 첨부해주세요.',
+          message: '사진은 1개 이상 첨부해주세요.',
         },
         HttpStatus.BAD_REQUEST,
       );
