@@ -14,11 +14,74 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ReportService } from './report.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { User } from 'src/auth/user.decorator';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('reports')
 @Controller('reports')
 export class ReportController {
   constructor(private reportService: ReportService) {}
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '신고 생성' })
+  @ApiResponse({
+    status: 201,
+    description: '신고가 성공적으로 생성되었습니다.',
+  })
+  @ApiResponse({ status: 401, description: '인증 실패' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+          description: '이미지 파일 (최대 3개)',
+        },
+        title: {
+          type: 'string',
+          description: '신고 제목',
+          example: '대구소프트웨어마이스터고 앞 보도블록이 파손되었습니다.',
+        },
+        category: {
+          type: 'string',
+          description: '신고 카테고리',
+          example: '도로안전',
+        },
+        description: {
+          type: 'string',
+          description: '신고 상세 내용',
+          example:
+            '대구소프트웨어마이스터고등학교 앞 보도블록이 파손되었습니다. 빠른 조치 부탁드립니다.',
+        },
+        lat: {
+          type: 'number',
+          description: '위도',
+          example: 37.123456,
+        },
+        lon: {
+          type: 'number',
+          description: '경도',
+          example: 127.123456,
+        },
+        dangerDegree: {
+          type: 'string',
+          description: '위험 정도',
+          example: '높음',
+        },
+      },
+    },
+  })
   @Post()
   @UseInterceptors(
     FilesInterceptor('images', 3, {
@@ -82,6 +145,11 @@ export class ReportController {
     };
   }
 
+  @ApiOperation({ summary: '모든 신고 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '모든 신고 목록을 반환합니다.',
+  })
   @Get()
   async getReports() {
     const reports = await this.reportService.getReports();
@@ -91,6 +159,8 @@ export class ReportController {
     };
   }
 
+  @ApiOperation({ summary: '특정 신고 조회' })
+  @ApiResponse({ status: 200, description: '신고 조회에 성공하였습니다.' })
   @Get(':id')
   async getReportById(@Param('id', ParseIntPipe) id: number) {
     const report = await this.reportService.getReportById(id);
@@ -100,6 +170,10 @@ export class ReportController {
     };
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '위험해요 추가' })
+  @ApiResponse({ status: 201, description: '위험해요 추가에 성공하였습니다.' })
+  @ApiResponse({ status: 401, description: '인증 실패' })
   @Post(':id/danger')
   async createDanger(@Param('id', ParseIntPipe) reportId: number) {
     const report = await this.reportService.createDanger(reportId);
@@ -109,6 +183,10 @@ export class ReportController {
     };
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '위험해요 삭제' })
+  @ApiResponse({ status: 200, description: '위험해요 삭제에 성공하였습니다.' })
+  @ApiResponse({ status: 401, description: '인증 실패' })
   @Delete(':id/danger')
   async deleteDanger(@Param('id', ParseIntPipe) reportId: number) {
     const report = await this.reportService.deleteDanger(reportId);
